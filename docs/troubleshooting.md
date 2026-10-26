@@ -35,3 +35,7 @@ Quit the app and copy `~/Library/Application Support/Mojo Mouse/library.json` so
 ## Text is too long
 
 The panel is only 96 × 39 pixels. Short messages are easiest to read. The exact pixel preview shows wrapping and shrinking. Reduce the text if it cannot fit. Marquee is intentionally omitted.
+
+## Logitech preview
+
+Use **Logitech mice (Preview)…** from the app menu for a listed wired Logitech device. The MOJO settings editor intentionally remains MJ-189-only. See [exact IDs and recovery](logitech.md). If live controls fail, **Use onboard settings** remains available independently of DPI/rate reads. Refresh after an error: a failed command may still have taken effect. `--diagnose-logitech` is the read-only compatibility report; `--diagnose` remains the MOJO report. No Logitech lighting or profile automation is enabled yet.

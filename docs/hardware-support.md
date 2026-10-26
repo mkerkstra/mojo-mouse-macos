@@ -4,6 +4,10 @@ The initial implementation was tested with one wired **MOJO Pro Performance Sile
 
 The controller opens only its vendor-specific HID interface, usage page/usage `ff01:ff01`. It does not seize normal mouse input, request global input monitoring, or flash firmware. Zero matching devices and multiple matching devices block writes.
 
+## Logitech preview
+
+The direct download has an opt-in [wired Logitech DPI/rate preview](logitech.md). It has **no physical acceptance evidence**. Its exact IDs, mode changes, limitations and read-only diagnostics are documented separately. The MOJO observations below do not apply to Logitech. The store target disables this preview.
+
 ## What was tested
 
 - Reading a 128-byte sensor/lighting profile, a 128-byte button map, and polling rate.

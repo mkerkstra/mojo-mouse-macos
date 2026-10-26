@@ -8,7 +8,7 @@
 [![Universal](https://img.shields.io/badge/Intel%20%2B%20Apple%20Silicon-universal-555)](#download-and-install)
 [![MIT license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-Independent, open-source software. No Windows VM, account, cloud service, or telemetry. **Currently supports only the wired MOJO MJ-189 with USB ID `260d:1027`.** Support for other MOJO models is not implied.
+Independent, open-source software. No Windows VM, account, cloud service, or telemetry. **Hardware-tested support: wired MOJO MJ-189, USB `260d:1027`.** The GitHub download also includes a separate [wired Logitech preview](docs/logitech.md) for live DPI and polling on exact G502, G403 and G102/G203 USB IDs. Logitech behavior has not been physically tested; its lighting, button remapping, profiles and automation are not enabled. Support for other MOJO models is not implied.
 
 ![Mojo Mouse profile editor showing named full and lighting-only profiles](docs/screenshots/profiles.jpg)
 
@@ -22,7 +22,7 @@ Independent, open-source software. No Windows VM, account, cloud service, or tel
 
 Release assets include `SHA256SUMS.txt`. The automatically generated GitHub “Source code” downloads contain source, **not the executable app**.
 
-## What you can do
+## What you can do with the MOJO MJ-189
 
 - **Lights:** turn off body and wheel RGB, blank the side display, restore the initial lighting, and set wheel colors for each DPI stage.
 - **Side display:** send short custom text with a 96 × 39 pixel preview, show the MOJO logo or built-in information, or blank the display. Text wraps and shrinks to fit; marquee is not provided.
@@ -53,10 +53,12 @@ See [profiles and rules](docs/profiles-and-rules.md) for examples and recovery b
 
 ## Compatibility
 
+For the separate Logitech preview, see its [exact USB IDs, controls, recovery and testing limits](docs/logitech.md).
+
 | Item                                | Current status                                                            |
 | ----------------------------------- | ------------------------------------------------------------------------- |
 | MOJO MJ-189, USB `260d:1027`        | One physical device tested; reported HID version `0x0316`                 |
-| Other MOJO models / other USB IDs   | Unsupported; no writes are attempted to other IDs                         |
+| Other MOJO models / MOJO USB IDs    | Unsupported; no writes are attempted to other IDs                         |
 | macOS                               | Built for macOS 13 or later                                               |
 | Apple Silicon                       | Native build; physical USB checks performed on Apple Silicon              |
 | Intel                               | Native universal-binary slice; CI exercises the executable on Intel       |
@@ -72,7 +74,7 @@ Macros, rapid fire, lift-off height, and raw profile-byte editing require **Adva
 
 Windows cursor speed, double-click speed, acceleration, and scroll speed are host preferences, not portable mouse profile settings. Use macOS Mouse settings for their Mac equivalents.
 
-The separately branded **Pointer Profiles** Mac App Store target is being prepared under the same open-source project. See [store distribution](docs/app-store.md). An available Xcode target does not imply Apple approval or public store availability.
+The separately branded **Pointer Profiles** Mac App Store edition was submitted for Apple review and remains MJ-189-only. See [store distribution](docs/app-store.md). An available Xcode target does not imply Apple approval or public store availability.
 
 ## Privacy and recovery
 
@@ -84,9 +86,11 @@ In the direct-download edition, profiles, rules, recipes, backups, and the last 
 ~/Library/Application Support/Mojo Mouse/
 ```
 
-No network access is used by the app. App rules use application identifiers from `NSWorkspace`; they do not read keystrokes or window contents and do not need Accessibility or Input Monitoring permission.
+The [Logitech preview permission limits](docs/logitech.md#macos-permissions) are separate: macOS may require Input Monitoring for a shared USB interface; the app checks existing permission without requesting it.
 
-Before readable settings change, the app saves a backup. It keeps the newest 50 generated snapshots plus the immutable original backup. If applying a profile fails, it attempts to restore and verify previous readable settings. A disconnect can prevent rollback, in which case the app reports that settings may have changed. Reload after reconnecting and import a backup if needed. Display contents cannot be backed up from hardware.
+No network access is used by the app. MOJO app rules use application identifiers from `NSWorkspace`; they do not read keystrokes or window contents and do not need Accessibility or Input Monitoring permission.
+
+Before MJ-189 readable settings change, the app saves a backup. It keeps the newest 50 generated snapshots plus the immutable original backup. If applying a profile fails, it attempts to restore and verify previous readable settings. A disconnect can prevent rollback, in which case the app reports that settings may have changed. Reload after reconnecting and import a backup if needed. Display contents cannot be backed up from hardware.
 
 A corrupt library is reported without silently overwriting it. See [troubleshooting](docs/troubleshooting.md).
 
@@ -116,4 +120,4 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md), the [protocol notes](docs/protocol.md),
 
 ## License and attribution
 
-[MIT](LICENSE). This repository contains independently written code and an original icon. It does not redistribute MOJO’s Windows installer, binaries, fonts, or artwork. MOJO names and trademarks belong to their respective owners. This project is not affiliated with or endorsed by MOJO.
+[MIT](LICENSE), with preserved [third-party notices](THIRD_PARTY_NOTICES.md) for the MIT-licensed libratbag protocol reference. No third-party runtime dependencies. This repository contains Swift code and an original icon. It does not redistribute MOJO’s Windows installer, binaries, fonts, or artwork. MOJO and Logitech names and trademarks belong to their respective owners. This project is not affiliated with or endorsed by either manufacturer.

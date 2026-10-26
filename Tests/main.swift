@@ -506,6 +506,227 @@ expectFailure("corrupt library is not silently reset") { _ = try store.read() }
 check(
   try String(contentsOf: corrupt, encoding: .utf8) == "broken",
   "corrupt file preserved for recovery")
+
+// HID++ fixtures come from documented protocol layouts, not a connected Logitech.
+check(LogitechCatalog.models.count == 8, "explicit Logitech product allowlist")
+for product in LogitechCatalog.models.keys {
+  check(
+    LogitechCatalog.accepts(
+      vendor: 0x046d, product: product, usagePages: [0xff00], transport: "USB"),
+    "allow wired vendor interface")
+}
+for (vendor, product, usage, transport) in [
+  (0x046d, 0xc08b, 1, "USB"), (0x046d, 0xc08b, 0xff00, "Bluetooth"),
+  (0x046d, 0xc539, 0xff00, "USB"), (0x260d, 0xc08b, 0xff00, "USB"),
+  (0x046d, 0xc095, 0xff00, "USB"), (0x046d, 0xc08b, -1, "USB"),
+] {
+  check(
+    !LogitechCatalog.accepts(
+      vendor: vendor, product: product, usagePages: [usage], transport: transport),
+    "reject unrelated interface or transport")
+}
+let hidpp = try HIDPPPacket(feature: 5, function: 3, softwareID: 8, parameters: [0, 3, 32])
+check(
+  hidpp.bytes == [0x11, 0xff, 5, 0x38, 0, 3, 32] + Array(repeating: 0, count: 13),
+  "HID++ long DPI packet fixture")
+check(try hidpp.response(hidpp.bytes) == Array(hidpp.bytes.dropFirst(4)), "match long reply")
+check(
+  try hidpp.response([0x10, 0xff, 5, 0x38, 0, 3, 32]) == [0, 3, 32],
+  "match short reply to long request")
+for reply: [UInt8] in [
+  [], [0x11], [0x10, 0xff, 5, 0x38], [0x10, 1, 5, 0x38, 0, 0, 0], [0x10, 0xff, 5, 0x39, 0, 0, 0],
+  [0x10, 0xff, 6, 0x38, 0, 0, 0],
+] {
+  check(try hidpp.response(reply) == nil, "ignore truncated, foreign device or unrelated reply")
+}
+expectFailure("HID++ 2 error cannot become success") {
+  _ = try hidpp.response([0x10, 0xff, 0xff, 5, 0x38, 2, 0])
+}
+expectFailure("HID++ 1 error cannot become success") {
+  _ = try hidpp.response([0x10, 0xff, 0x8f, 5, 0x38, 2, 0])
+}
+expectFailure("reject oversized HID++ payload") {
+  _ = try HIDPPPacket(
+    feature: 1, function: 0, softwareID: 8, parameters: Array(repeating: 0, count: 17))
+}
+expectFailure("reject reserved software ID") {
+  _ = try HIDPPPacket(feature: 1, function: 0, softwareID: 1)
+}
+
+func dpiList(_ words: [Int]) -> [UInt8] {
+  let bytes: [UInt8] = [0] + words.flatMap { [UInt8($0 >> 8), UInt8($0 & 255)] }
+  return bytes + Array(repeating: 0, count: 16 - bytes.count)
+}
+let dpiRange = try LogitechDPIRange(reply: dpiList([100, 0xe032, 25600]))
+check(
+  dpiRange.contains(100) && dpiRange.contains(800) && dpiRange.contains(25600),
+  "DPI range endpoints and step")
+check(
+  !dpiRange.contains(99) && !dpiRange.contains(125) && !dpiRange.contains(25650),
+  "reject off-grid DPI")
+let discreteDPI = try LogitechDPIRange(reply: dpiList([400, 800, 1600]))
+check(discreteDPI.contains(800) && !discreteDPI.contains(600), "discrete DPI list")
+for list in [
+  dpiList([]), dpiList([800, 400]), dpiList([400, 400]), dpiList([100, 0xe000, 1000]),
+  dpiList([100, 0xe032, 0xe064, 1000]), [0, 1, 2],
+] {
+  expectFailure("malformed DPI list fails closed") { _ = try LogitechDPIRange(reply: list) }
+}
+
+final class FakeHIDPP: HIDPPTransport {
+  var mode: UInt8 = 1
+  var dpi = 800
+  var rate: UInt8 = 1
+  var features: [UInt16: UInt8] = [0x2201: 5, 0x8060: 7, 0x8100: 9, 0x8071: 10]
+  var writes: [(UInt8, UInt8, [UInt8])] = []
+  var ignoreDPIWrite = false
+  var failWrites = false
+  var invalidVersion = false
+  var wrongToken = false
+  var truncateDPI = false
+  var sensorCount: UInt8 = 1
+  func request(feature: UInt8, function: UInt8, parameters: [UInt8]) throws -> [UInt8] {
+    func padded(_ bytes: [UInt8]) -> [UInt8] {
+      bytes + Array(repeating: 0, count: 16 - bytes.count)
+    }
+    if feature == 0 {
+      if function == 1 { return [invalidVersion ? 1 : 2, 0, wrongToken ? 0 : parameters[2]] }
+      let id = UInt16(parameters[0]) << 8 | UInt16(parameters[1])
+      return [features[id] ?? 0, 0, 0]
+    }
+    let key = features.first(where: { $0.value == feature })?.key
+    switch (key, function) {
+    case (0x8100, 2): return padded([mode])
+    case (0x2201, 0): return padded([sensorCount])
+    case (0x2201, 1): return dpiList([100, 0xe032, 25600])
+    case (0x2201, 2):
+      return truncateDPI ? [0, 3] : padded([0, UInt8(dpi >> 8), UInt8(dpi & 255), 3, 32])
+    case (0x8060, 0): return padded([0x8b])  // 1, 2, 4, 8ms, not 1, 2, 8, 128ms
+    case (0x8060, 1): return padded([rate])
+    case (0x8100, 1), (0x2201, 3), (0x8060, 2):
+      writes.append((feature, function, parameters))
+      if failWrites { throw MouseFailure(message: "Injected transport failure") }
+      if key == 0x8100 { mode = parameters[0] }
+      if key == 0x2201 && !ignoreDPIWrite { dpi = Int(parameters[1]) << 8 | Int(parameters[2]) }
+      if key == 0x8060 { rate = parameters[0] }
+      return padded(parameters)
+    default: throw MouseFailure(message: "Unexpected command in Logitech fixture")
+    }
+  }
+}
+let logitech = FakeHIDPP()
+let logitechController = try LogitechController(logitech)
+let onboardState = try logitechController.read()
+check(
+  logitech.writes.isEmpty && onboardState.mode == 1 && onboardState.dpi == 800,
+  "discovery only reads settings")
+check(onboardState.rates == [1, 2, 4, 8], "polling capability bit positions are milliseconds")
+expectFailure("block DPI change in onboard mode") {
+  _ = try logitechController.setDPI(1600, expected: onboardState)
+}
+check(logitech.writes.isEmpty, "blocked action sends no setting command")
+var liveState = try logitechController.setMode(2, expected: onboardState)
+check(liveState.mode == 2 && logitech.writes.count == 1, "explicit mode change verified")
+liveState = try logitechController.setDPI(1600, expected: liveState)
+check(
+  liveState.dpi == 1600 && logitech.writes.last?.2 == [0, 6, 64],
+  "DPI writes big-endian sensor zero and verifies")
+liveState = try logitechController.setRate(4, expected: liveState)
+check(
+  liveState.rate == 4 && logitech.writes.last?.2 == [4], "polling writes milliseconds and verifies")
+let writeCount = logitech.writes.count
+_ = try logitechController.setDPI(1600, expected: liveState)
+_ = try logitechController.setRate(4, expected: liveState)
+check(logitech.writes.count == writeCount, "unchanged values are never written")
+expectFailure("invalid DPI blocked before sending") {
+  _ = try logitechController.setDPI(Int.max, expected: liveState)
+}
+expectFailure("negative DPI blocked before sending") {
+  _ = try logitechController.setDPI(-1, expected: liveState)
+}
+expectFailure("invalid polling rate blocked before sending") {
+  _ = try logitechController.setRate(3, expected: liveState)
+}
+expectFailure("invalid mode blocked before sending") {
+  _ = try logitechController.setMode(255, expected: liveState)
+}
+check(logitech.writes.count == writeCount, "all invalid values send no write")
+logitech.dpi = 2000
+expectFailure("physical DPI changes require refresh") {
+  _ = try logitechController.setRate(8, expected: liveState)
+}
+check(logitech.writes.count == writeCount, "stale state sends no write")
+liveState = try logitechController.read()
+logitech.ignoreDPIWrite = true
+expectFailure("ACK without DPI readback is failure") {
+  _ = try logitechController.setDPI(1600, expected: liveState)
+}
+logitech.ignoreDPIWrite = false
+logitech.failWrites = true
+expectFailure("disconnect propagates without false success") {
+  _ = try logitechController.setRate(8, expected: liveState)
+}
+logitech.failWrites = false
+let restoredLogitech = try logitechController.setMode(1, expected: liveState)
+check(restoredLogitech.mode == 1, "can return to onboard settings")
+check(
+  logitech.writes.allSatisfy { [5, 7, 9].contains($0.0) },
+  "no lighting, memory or button commands sent")
+for invalid in ["version", "token", "sensor", "truncated", "mode", "duplicate"] {
+  let transport = FakeHIDPP()
+  transport.invalidVersion = invalid == "version"
+  transport.wrongToken = invalid == "token"
+  transport.sensorCount = invalid == "sensor" ? 2 : 1
+  transport.truncateDPI = invalid == "truncated"
+  transport.mode = invalid == "mode" ? 7 : 1
+  if invalid == "duplicate" { transport.features[0x8060] = 5 }
+  expectFailure("reject unsupported device response \(invalid)") {
+    _ = try LogitechController(transport).read()
+  }
+  check(transport.writes.isEmpty, "unsupported reply sends no writes")
+}
+let minimalLogitech = FakeHIDPP()
+minimalLogitech.features = [:]
+let minimalState = try LogitechController(minimalLogitech).read()
+check(
+  minimalState.dpi == nil && minimalState.rate == nil && minimalState.mode == nil,
+  "absent capabilities remain unavailable")
+expectFailure("missing capability cannot be forced") {
+  _ = try LogitechController(minimalLogitech).setDPI(800, expected: minimalState)
+}
+
+let recoveryLogitech = FakeHIDPP()
+recoveryLogitech.mode = 2
+recoveryLogitech.truncateDPI = true
+let recoveryController = try LogitechController(recoveryLogitech)
+expectFailure("broken live reads require recovery") { _ = try recoveryController.read() }
+try recoveryController.restoreOnboard()
+check(
+  recoveryLogitech.mode == 1 && recoveryLogitech.writes.count == 1,
+  "onboard recovery does not depend on DPI/rate reads")
+try recoveryController.restoreOnboard()
+check(recoveryLogitech.writes.count == 1, "recovery avoids unnecessary mode writes")
+expectFailure("missing onboard feature cannot be forced") {
+  try LogitechController(minimalLogitech).restoreOnboard()
+}
+
+check(
+  LogitechCatalog.accepts(
+    vendor: 0x046d, product: 0xc08b, usagePages: [1, 12, 0xff00], transport: "USB"),
+  "composite Logitech interface matches secondary vendor usage")
+check(
+  LogitechCatalog.requiresInputPermission([
+    HIDUsagePair(page: 1, usage: 6), HIDUsagePair(page: 0xff00, usage: 1),
+  ]), "keyboard collection requires prior input permission")
+check(
+  !LogitechCatalog.requiresInputPermission([HIDUsagePair(page: 0xff00, usage: 1)]),
+  "vendor-only configuration does not require input permission")
+recoveryLogitech.mode = 7
+try recoveryController.restoreOnboard()
+check(
+  recoveryLogitech.mode == 1 && recoveryLogitech.writes.count == 2,
+  "explicit recovery handles unknown modes")
+
 print(
-  "Passed \(assertions) native checks: packet fixtures, validation, scopes, rule priority, overnight/DST windows, persistence, rollback, and disconnect handling."
+  "Passed \(assertions) native checks: packet fixtures, validation, scopes, rule priority, overnight/DST windows, persistence, rollback, disconnect handling, and Logitech HID++ preview."
 )

@@ -24,6 +24,8 @@ targets:
         excludes: [Resources, Info.plist, AppIcon.icns]
       - path: Sources/MojoMouse/Resources
         buildPhase: resources
+      - path: THIRD_PARTY_NOTICES.md
+        buildPhase: resources
       - path: Distribution/Assets.xcassets
         buildPhase: resources
     settings:

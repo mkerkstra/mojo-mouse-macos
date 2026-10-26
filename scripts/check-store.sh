@@ -9,6 +9,11 @@ test "$(/usr/libexec/PlistBuddy -c 'Print CFBundlePackageType' "$app/Contents/In
 test "$(/usr/libexec/PlistBuddy -c 'Print LSApplicationCategoryType' "$app/Contents/Info.plist")" = public.app-category.utilities
 test -f "$app/Contents/Resources/PrivacyInfo.xcprivacy"
 test -f "$app/Contents/Resources/settings.html"
+test -f "$app/Contents/Resources/THIRD_PARTY_NOTICES.md"
+if "$app/Contents/MacOS/PointerProfiles" --diagnose-logitech; then
+  echo "Logitech preview must be disabled in the store target"
+  exit 1
+fi
 codesign --force --sign - --entitlements Distribution/Store.entitlements "$app"
 codesign --verify --deep --strict "$app"
 "$app/Contents/MacOS/PointerProfiles" --version

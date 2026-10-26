@@ -7,16 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01349D8E6F234654E5745921 /* LogitechProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DD83A9C237001B591B17E8F /* LogitechProtocol.swift */; };
+		03BA4263CB26820E956226AC /* LogitechWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CA95115F083C4352853597 /* LogitechWindow.swift */; };
 		057BE44893CCD982F4086D3E /* settings.css in Resources */ = {isa = PBXBuildFile; fileRef = B120544CCAF92EC03533284D /* settings.css */; };
 		0E7B67A774E6395A13B9702E /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02B991792D863F597426747 /* main.swift */; };
 		20E10A7FD8BAF0E6793CD90B /* AutomationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C970385830BCEDE0328CA7 /* AutomationEngine.swift */; };
 		22257A4B2152CA7C082A13ED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 51D23A51F5D36B68B3FA3074 /* Assets.xcassets */; };
 		289C0653B4E549501947D45C /* ProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DC82355DCF5E83294539DA /* ProfileController.swift */; };
 		2B903CFCE593C740F817B480 /* AppInformationWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF74057F7D12E9FA0026863C /* AppInformationWindow.swift */; };
+		2CDE36BF38D6D6137BBE918E /* LogitechHID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28590BDA5B771F1C4120E473 /* LogitechHID.swift */; };
 		3CB25127EAE0ABF27CAAD5EC /* Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = F98F1E67AB5ED0258CC619E1 /* Display.swift */; };
 		3ECEFA735140CEB5DE3BF7F0 /* bootstrap.js in Resources */ = {isa = PBXBuildFile; fileRef = 4E7606B0ADE2D0FD4E04477A /* bootstrap.js */; };
 		426D0F55DDC8CA89F45A781E /* WritePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A466F60B7956C881DB71622 /* WritePolicy.swift */; };
 		5AC3E10BC78ED32B9B1607B5 /* settings.html in Resources */ = {isa = PBXBuildFile; fileRef = 05F66E77A986EE40C497AF7F /* settings.html */; };
+		6B4D683AAD270605CC9DA29E /* THIRD_PARTY_NOTICES.md in Resources */ = {isa = PBXBuildFile; fileRef = 2A9577DF3CFA10151706F48A /* THIRD_PARTY_NOTICES.md */; };
 		83F591DB1BD625CB2024B353 /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B42E87E54B9355C880A105 /* AppInfo.swift */; };
 		8B7984BA7A8D1FEEF972894B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 3070BCE5A7AA4230D75D7F15 /* PrivacyInfo.xcprivacy */; };
 		97F549535C67D5F069DFB22A /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22AF71F7A8ED65E0E2348C44 /* SettingsWindow.swift */; };
@@ -34,15 +38,19 @@
 		05F66E77A986EE40C497AF7F /* settings.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = settings.html; sourceTree = "<group>"; };
 		11B42E87E54B9355C880A105 /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
 		22AF71F7A8ED65E0E2348C44 /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
+		28590BDA5B771F1C4120E473 /* LogitechHID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogitechHID.swift; sourceTree = "<group>"; };
+		2A9577DF3CFA10151706F48A /* THIRD_PARTY_NOTICES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = THIRD_PARTY_NOTICES.md; sourceTree = "<group>"; };
 		3070BCE5A7AA4230D75D7F15 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		35C970385830BCEDE0328CA7 /* AutomationEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationEngine.swift; sourceTree = "<group>"; };
 		4E7606B0ADE2D0FD4E04477A /* bootstrap.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = bootstrap.js; sourceTree = "<group>"; };
 		51D23A51F5D36B68B3FA3074 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		52CA95115F083C4352853597 /* LogitechWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogitechWindow.swift; sourceTree = "<group>"; };
 		6141F1F60EDB67A32F039678 /* profiles.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = profiles.js; sourceTree = "<group>"; };
 		69B68132BB24CDC8625C6ABF /* Mouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mouse.swift; sourceTree = "<group>"; };
 		6F496754771B4C74DBA77E6F /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
 		7A466F60B7956C881DB71622 /* WritePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritePolicy.swift; sourceTree = "<group>"; };
 		91646ACD63F4B3D7BC51A067 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		9DD83A9C237001B591B17E8F /* LogitechProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogitechProtocol.swift; sourceTree = "<group>"; };
 		B0E2CC2A806DAF2F3AD9A263 /* Pointer Profiles.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Pointer Profiles.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B120544CCAF92EC03533284D /* settings.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = settings.css; sourceTree = "<group>"; };
 		BAC62314DE44A012F4C6D69D /* settings.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = settings.js; sourceTree = "<group>"; };
@@ -59,6 +67,7 @@
 		344937D9B1728382AA4A7ABE = {
 			isa = PBXGroup;
 			children = (
+				2A9577DF3CFA10151706F48A /* THIRD_PARTY_NOTICES.md */,
 				CE07B49F3F45921000258D24 /* Distribution */,
 				5F90284CACC67CB121121B35 /* MojoMouse */,
 				D8F3087253171B9B49A0796B /* Resources */,
@@ -73,6 +82,9 @@
 				CF74057F7D12E9FA0026863C /* AppInformationWindow.swift */,
 				35C970385830BCEDE0328CA7 /* AutomationEngine.swift */,
 				F98F1E67AB5ED0258CC619E1 /* Display.swift */,
+				28590BDA5B771F1C4120E473 /* LogitechHID.swift */,
+				9DD83A9C237001B591B17E8F /* LogitechProtocol.swift */,
+				52CA95115F083C4352853597 /* LogitechWindow.swift */,
 				C02B991792D863F597426747 /* main.swift */,
 				91646ACD63F4B3D7BC51A067 /* Models.swift */,
 				69B68132BB24CDC8625C6ABF /* Mouse.swift */,
@@ -180,6 +192,7 @@
 			files = (
 				22257A4B2152CA7C082A13ED /* Assets.xcassets in Resources */,
 				8B7984BA7A8D1FEEF972894B /* PrivacyInfo.xcprivacy in Resources */,
+				6B4D683AAD270605CC9DA29E /* THIRD_PARTY_NOTICES.md in Resources */,
 				3ECEFA735140CEB5DE3BF7F0 /* bootstrap.js in Resources */,
 				E160EB4EBC48EC57B018CABF /* profiles.js in Resources */,
 				D439D993D1028E152F74023D /* rules.js in Resources */,
@@ -200,6 +213,9 @@
 				2B903CFCE593C740F817B480 /* AppInformationWindow.swift in Sources */,
 				20E10A7FD8BAF0E6793CD90B /* AutomationEngine.swift in Sources */,
 				3CB25127EAE0ABF27CAAD5EC /* Display.swift in Sources */,
+				2CDE36BF38D6D6137BBE918E /* LogitechHID.swift in Sources */,
+				01349D8E6F234654E5745921 /* LogitechProtocol.swift in Sources */,
+				03BA4263CB26820E956226AC /* LogitechWindow.swift in Sources */,
 				AB386D83694B4DBFC472E8BB /* Models.swift in Sources */,
 				B94B3EF887E13E2B1BD4EF98 /* Mouse.swift in Sources */,
 				E89EE20C7C13D69A0EE2A4CA /* Packet.swift in Sources */,

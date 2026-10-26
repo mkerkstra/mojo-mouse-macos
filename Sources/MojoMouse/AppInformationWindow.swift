@@ -36,7 +36,9 @@ private struct AppInformationView: View {
             "Control lighting, DPI, buttons, and static side text. Save profiles for work, games, or a quieter desk."
           )
           Text(
-            "Requires one wired MOJO MJ-189, USB 260d:1027. Other mouse models are not supported."
+            AppInfo.appStore
+              ? "Requires one wired MOJO MJ-189, USB 260d:1027."
+              : "Requires a wired MOJO MJ-189, USB 260d:1027, for profiles. A separate wired Logitech DPI/rate preview is available from the app menu; physical behavior is unverified."
           )
           .foregroundStyle(.secondary)
         }
@@ -69,10 +71,13 @@ private struct AppInformationView: View {
           Link("Support", destination: AppInfo.support)
           Link("Privacy", destination: AppInfo.privacy)
           Link("Source & license", destination: AppInfo.website)
+          Link(
+            "Notices",
+            destination: AppInfo.website.appendingPathComponent("blob/main/THIRD_PARTY_NOTICES.md"))
         }
         .font(.callout)
         Text(
-          "© 2026 Matthew Kerkstra · MIT License\nIndependent software. Not affiliated with or endorsed by MOJO. Product names belong to their owners."
+          "© 2026 Matthew Kerkstra · MIT License\nIndependent software. Not affiliated with or endorsed by MOJO or Logitech. Product names belong to their owners."
         )
         .font(.caption).foregroundStyle(.secondary)
       }

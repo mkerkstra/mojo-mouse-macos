@@ -44,6 +44,18 @@ assert(Object.values(entitlements).every((value) => value === true));
 const privacy = plist('Sources/MojoMouse/Resources/PrivacyInfo.xcprivacy');
 assert.equal(privacy.NSPrivacyTracking, false);
 assert.deepEqual(privacy.NSPrivacyCollectedDataTypes, []);
+assert.deepEqual(
+  Object.fromEntries(
+    privacy.NSPrivacyAccessedAPITypes.map((entry) => [
+      entry.NSPrivacyAccessedAPIType,
+      entry.NSPrivacyAccessedAPITypeReasons,
+    ]),
+  ),
+  {
+    NSPrivacyAccessedAPICategoryFileTimestamp: ['C617.1'],
+    NSPrivacyAccessedAPICategorySystemBootTime: ['35F9.1'],
+  },
+);
 console.log('Passed: app metadata, version consistency, store entitlement boundaries, and privacy manifest.');
 
 // Screenshot captures may be JPEG bytes even when a caller gives them a PNG suffix.

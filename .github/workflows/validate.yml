@@ -39,4 +39,6 @@ jobs:
       - run: ./scripts/build.sh
       - run: '"build/Mojo Mouse.app/Contents/MacOS/MojoMouse" --version'
       - run: '"build/Mojo Mouse.app/Contents/MacOS/MojoMouse" --diagnose'
+      - run: '"build/Mojo Mouse.app/Contents/MacOS/MojoMouse" --diagnose-logitech'
+      - run: cmp THIRD_PARTY_NOTICES.md 'build/Mojo Mouse.app/Contents/Resources/THIRD_PARTY_NOTICES.md'
       - run: ./scripts/check-store.sh

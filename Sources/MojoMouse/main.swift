@@ -18,6 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   private var offButton: NSButton!
   private var settingsWindow: SettingsWindow?
   private var informationWindow: AppInformationWindow?
+  private var logitechWindow: LogitechWindow?
   private var menuItem: NSStatusItem!
   private var libraryObserver: NSObjectProtocol?
 
@@ -28,6 +29,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     submenu.addItem(withTitle: "About \(AppInfo.name)", action: #selector(about), keyEquivalent: "")
     submenu.addItem(.separator())
     submenu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+    if AppInfo.allowsExperimental {
+      submenu.addItem(
+        withTitle: "Logitech mice (Preview)…", action: #selector(openLogitech), keyEquivalent: "")
+    }
     submenu.addItem(.separator())
     submenu.addItem(
       withTitle: "Quit \(AppInfo.name)", action: #selector(NSApplication.terminate(_:)),
@@ -89,6 +94,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       title: "Profiles & rules…", action: #selector(openSettings), keyEquivalent: "")
     settings.target = self
     menu.addItem(settings)
+    if AppInfo.allowsExperimental {
+      let logitech = NSMenuItem(
+        title: "Logitech mice (Preview)…", action: #selector(openLogitech), keyEquivalent: "")
+      logitech.target = self
+      menu.addItem(logitech)
+    }
     if let library = try? LibraryStore.shared.read() {
       if !library.profiles.isEmpty {
         menu.addItem(.separator())
@@ -188,7 +199,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   }
   private func buildWindow() {
     window = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 500, height: 570),
+      contentRect: NSRect(x: 0, y: 0, width: 500, height: AppInfo.allowsExperimental ? 610 : 570),
       styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
     window.title = AppInfo.name
     window.titlebarAppearsTransparent = true
@@ -271,6 +282,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         heading, caption, offButton, line(), bodyRow, wheelRow, sideRow, line(), footer, settings,
         status,
       ], spacing: 14)
+    if AppInfo.allowsExperimental {
+      let other = button("Logitech mice (Preview)…", #selector(openLogitech))
+      stack.insertArrangedSubview(other, at: stack.arrangedSubviews.count - 1)
+    }
     stack.translatesAutoresizingMaskIntoConstraints = false
     content.addSubview(stack)
     NSLayoutConstraint.activate([
@@ -289,6 +304,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   }
   private func setEnabled(_ enabled: Bool) {
     for control in controls { control.isEnabled = enabled }
+    controls.first(where: { $0.action == #selector(openLogitech) })?.isEnabled = true
     // Reconnecting must remain available after a missing-device error.
     controls.first(where: { $0.action == #selector(openSettings) })?.isEnabled = true
     if !busy { controls.first(where: { $0.action == #selector(refresh) })?.isEnabled = true }
@@ -412,6 +428,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     settingsWindow?.showWindow(nil)
     settingsWindow?.window?.makeKeyAndOrderFront(nil)
   }
+  @objc private func openLogitech() {
+    guard AppInfo.allowsExperimental else { return }
+    if logitechWindow == nil { logitechWindow = LogitechWindow() }
+    logitechWindow?.showWindow(nil)
+    logitechWindow?.window?.makeKeyAndOrderFront(nil)
+    NSApp.activate(ignoringOtherApps: true)
+  }
   @objc private func about() {
     if informationWindow == nil { informationWindow = AppInformationWindow() }
     informationWindow?.showWindow(nil)
@@ -426,6 +449,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 if CommandLine.arguments.contains("--version") {
   print("\(AppInfo.name) \(AppInfo.version)")
   exit(0)
+}
+if CommandLine.arguments.contains("--diagnose-logitech") {
+  guard AppInfo.allowsExperimental else {
+    fputs("Logitech preview is available in the GitHub download only.\n", stderr)
+    exit(1)
+  }
+  let devices = LogitechHID.discover()
+  var report: [String: Any] = [
+    "preview": true, "connectedCount": devices.count,
+    "devices": devices.map { ["model": $0.name, "usbID": $0.usbID] },
+  ]
+  if devices.count == 1 {
+    do {
+      let connection = try LogitechHID(identity: devices[0].identity)
+      let state = try LogitechController(connection).read()
+      report["mode"] = state.mode as Any? ?? NSNull()
+      report["dpi"] = state.dpi as Any? ?? NSNull()
+      report["pollingIntervalMS"] = state.rate as Any? ?? NSNull()
+      report["features"] = state.features.keys.sorted().map { String(format: "0x%04x", $0) }
+    } catch { report["error"] = error.localizedDescription }
+  }
+  let data = try JSONSerialization.data(
+    withJSONObject: report, options: [.prettyPrinted, .sortedKeys])
+  print(String(data: data, encoding: .utf8)!)
+  exit(report["error"] == nil ? 0 : 1)
 }
 if CommandLine.arguments.contains("--diagnose") {
   let discovery = MouseConnection.discovery()

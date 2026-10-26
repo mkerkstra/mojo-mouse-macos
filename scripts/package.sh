@@ -11,12 +11,16 @@ trap 'rm -rf "$stage"' EXIT
 ditto "$app" "$stage/Mojo Mouse.app"
 ln -s /Applications "$stage/Applications"
 cp LICENSE "$stage/LICENSE.txt"
+cp THIRD_PARTY_NOTICES.md "$stage/THIRD_PARTY_NOTICES.txt"
 cat > "$stage/Read me first.txt" <<TXT
 Mojo Mouse $version for macOS
 
 Drag Mojo Mouse into Applications, connect one wired MOJO MJ-189, and open it.
 Requires macOS 13 or later. Supports Apple Silicon and Intel.
-Supported USB ID: 260d:1027. Other MOJO models are not supported.
+MOJO USB ID: 260d:1027. Other MOJO models are not supported.
+Experimental wired Logitech DPI/rate controls: app menu > Logitech mice (Preview).
+G502 Core/Spectrum/HERO, G403/HERO, G102/G203: exact IDs and limits in docs/logitech.md.
+No physical Logitech testing yet. Logitech lighting, buttons and automation are not supported.
 
 This initial release is ad-hoc signed, not Developer ID signed or Apple notarized.
 If macOS blocks it and you trust the release, first try opening it, then use:
