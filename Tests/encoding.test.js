@@ -62,3 +62,18 @@ assert.throws(() => run('encodeDPI(0,7250)'), /steps of 100/);
 console.log(
   'Passed: shortcut encoding, paired macro events, long delays, 128-byte limits, DPI banks and ranges.',
 );
+
+// A store build must hide experimental controls even if old preferences request them.
+const storeContext = vm.createContext({
+  ...context,
+  window: {
+    ...context.window,
+    mojoApp: { experimental: false },
+    mojoPreferences: { experimental: 'true' },
+  },
+});
+vm.runInContext(code, storeContext);
+assert.equal(vm.runInContext('experimentalAvailable', storeContext), false);
+assert(!fields.get('#nav').innerHTML.includes('data-page="macros"'));
+assert(!fields.get('#nav').innerHTML.includes('data-page="rapid"'));
+console.log('Passed: store build hides experimental tabs even with stale opt-in preferences.');

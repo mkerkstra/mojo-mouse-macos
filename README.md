@@ -72,9 +72,13 @@ Macros, rapid fire, lift-off height, and raw profile-byte editing require **Adva
 
 Windows cursor speed, double-click speed, acceleration, and scroll speed are host preferences, not portable mouse profile settings. Use macOS Mouse settings for their Mac equivalents.
 
+The separately branded **Pointer Profiles** Mac App Store target is being prepared under the same open-source project. See [store distribution](docs/app-store.md). An available Xcode target does not imply Apple approval or public store availability.
+
 ## Privacy and recovery
 
-All profiles, rules, recipes, backups, and the last 100 status events stay under:
+Read the [privacy policy](PRIVACY.md).
+
+In the direct-download edition, profiles, rules, recipes, backups, and the last 100 status events stay under:
 
 ```text
 ~/Library/Application Support/Mojo Mouse/

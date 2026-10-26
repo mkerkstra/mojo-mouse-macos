@@ -1,12 +1,12 @@
 {
   "name": "mojo-mouse-macos",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Frontend checks and formatting for the native Mojo Mouse macOS app",
   "scripts": {
     "test": "node Tests/encoding.test.js",
-    "format:check": "prettier --check 'Sources/MojoMouse/Resources/*.{js,css,html}' 'Tests/*.js' '*.{md,json}' 'docs/*.md' '.github/**/*.{yml,md}' .swift-format",
-    "format": "prettier --write 'Sources/MojoMouse/Resources/*.{js,css,html}' 'Tests/*.js' '*.{md,json}' 'docs/*.md' '.github/**/*.{yml,md}' .swift-format",
+    "format:check": "prettier --check 'Sources/MojoMouse/Resources/*.{js,css,html}' 'Tests/*.js' '*.{md,json,yml}' 'Distribution/**/*.json' 'docs/*.md' '.github/**/*.{yml,md}' .swift-format",
+    "format": "prettier --write 'Sources/MojoMouse/Resources/*.{js,css,html}' 'Tests/*.js' '*.{md,json,yml}' 'Distribution/**/*.json' 'docs/*.md' '.github/**/*.{yml,md}' .swift-format",
     "lint": "./scripts/lint.sh",
     "check": "npm run lint && ./scripts/test.sh"
   },

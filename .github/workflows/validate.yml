@@ -39,3 +39,4 @@ jobs:
       - run: ./scripts/build.sh
       - run: '"build/Mojo Mouse.app/Contents/MacOS/MojoMouse" --version'
       - run: '"build/Mojo Mouse.app/Contents/MacOS/MojoMouse" --diagnose'
+      - run: ./scripts/check-store.sh

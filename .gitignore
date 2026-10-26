@@ -11,3 +11,8 @@ node_modules/
 *.zip
 Original mouse settings.json
 work/
+*.xcuserstate
+xcuserdata/
+*.xcarchive/
+*.pkg
+*.provisionprofile

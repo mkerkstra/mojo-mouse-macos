@@ -9,3 +9,4 @@ done
 xcrun swiftc -warnings-as-errors "${sources[@]}" Tests/main.swift -o build/tests/core -framework AppKit -framework IOKit
 build/tests/core
 node Tests/encoding.test.js
+node Tests/metadata.test.js

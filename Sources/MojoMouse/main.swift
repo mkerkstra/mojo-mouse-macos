@@ -17,6 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   private var indicator: NSView!
   private var offButton: NSButton!
   private var settingsWindow: SettingsWindow?
+  private var informationWindow: AppInformationWindow?
   private var menuItem: NSStatusItem!
   private var libraryObserver: NSObjectProtocol?
 
@@ -24,19 +25,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let appMenu = NSMenu()
     let top = NSMenuItem()
     let submenu = NSMenu()
-    submenu.addItem(withTitle: "About Mojo Mouse", action: #selector(about), keyEquivalent: "")
+    submenu.addItem(withTitle: "About \(AppInfo.name)", action: #selector(about), keyEquivalent: "")
+    submenu.addItem(.separator())
+    submenu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
     submenu.addItem(.separator())
     submenu.addItem(
-      withTitle: "Quit Mojo Mouse", action: #selector(NSApplication.terminate(_:)),
+      withTitle: "Quit \(AppInfo.name)", action: #selector(NSApplication.terminate(_:)),
       keyEquivalent: "q")
     top.submenu = submenu
     appMenu.addItem(top)
+    let edit = NSMenuItem()
+    let editMenu = NSMenu(title: "Edit")
+    for (title, action, key) in [
+      ("Undo", "undo:", "z"), ("Redo", "redo:", "Z"),
+      ("Cut", "cut:", "x"), ("Copy", "copy:", "c"),
+      ("Paste", "paste:", "v"), ("Select All", "selectAll:", "a"),
+    ] {
+      editMenu.addItem(withTitle: title, action: Selector(action), keyEquivalent: key)
+    }
+    edit.submenu = editMenu
+    appMenu.addItem(edit)
+    let help = NSMenuItem()
+    let helpMenu = NSMenu(title: "Help")
+    helpMenu.addItem(withTitle: "User Guide", action: #selector(openGuide), keyEquivalent: "?")
+    helpMenu.addItem(
+      withTitle: "Support & Compatibility", action: #selector(openSupport), keyEquivalent: "")
+    helpMenu.addItem(withTitle: "Privacy Policy", action: #selector(openPrivacy), keyEquivalent: "")
+    help.submenu = helpMenu
+    appMenu.addItem(help)
+    NSApp.helpMenu = helpMenu
     NSApplication.shared.mainMenu = appMenu
     buildWindow()
     menuItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     menuItem.button?.image = NSImage(
-      systemSymbolName: "computermouse", accessibilityDescription: "Mojo Mouse")
-    menuItem.button?.toolTip = "Mojo Mouse"
+      systemSymbolName: "computermouse", accessibilityDescription: AppInfo.name)
+    menuItem.button?.toolTip = AppInfo.name
     rebuildMenu()
     AutomationEngine.shared.onChange = { [weak self] in self?.rebuildMenu() }
     libraryObserver = NotificationCenter.default.addObserver(
@@ -59,7 +82,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     guard menuItem != nil else { return }
     let menu = NSMenu()
     let open = NSMenuItem(
-      title: "Open Mojo Mouse", action: #selector(openWindow), keyEquivalent: "")
+      title: "Open \(AppInfo.name)", action: #selector(openWindow), keyEquivalent: "")
     open.target = self
     menu.addItem(open)
     let settings = NSMenuItem(
@@ -95,7 +118,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     menu.addItem(.separator())
     let quit = NSMenuItem(
-      title: "Quit Mojo Mouse", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+      title: "Quit \(AppInfo.name)", action: #selector(NSApplication.terminate(_:)),
+      keyEquivalent: "q")
     menu.addItem(quit)
     menuItem.menu = menu
   }
@@ -115,7 +139,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       perform("Applying \(profile.name)…", pauseRules: true) { mouse, _, _ in
         let applied = try ProfileController().apply(
           profile, to: mouse, textPixels: pixels,
-          experimental: (try LibraryStore.shared.read().preferences["experimental"]) == "true")
+          experimental: AppInfo.allowsExperimental
+            && (try LibraryStore.shared.read().preferences["experimental"]) == "true")
         return MouseState(profile: applied.profile, data: applied.data)
       }
     } catch { status.stringValue = error.localizedDescription }
@@ -165,14 +190,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     window = NSWindow(
       contentRect: NSRect(x: 0, y: 0, width: 500, height: 570),
       styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
-    window.title = "Mojo Mouse"
+    window.title = AppInfo.name
     window.titlebarAppearsTransparent = true
     window.center()
     window.isReleasedWhenClosed = false
     let content = window.contentView!
 
     let moon = NSImageView(
-      image: NSImage(systemSymbolName: "moon.stars.fill", accessibilityDescription: "Mojo Mouse")!)
+      image: NSImage(systemSymbolName: "moon.stars.fill", accessibilityDescription: AppInfo.name)!)
     moon.contentTintColor = .systemIndigo
     moon.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 32, weight: .medium)
     moon.widthAnchor.constraint(equalToConstant: 48).isActive = true
@@ -388,24 +413,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     settingsWindow?.window?.makeKeyAndOrderFront(nil)
   }
   @objc private func about() {
-    NSApp.orderFrontStandardAboutPanel(options: [
-      .applicationName: "Mojo Mouse",
-      .applicationVersion: "0.1.0",
-      .credits: NSAttributedString(
-        string:
-          "Profiles, lighting, and automatic switching for the MOJO MJ-189.\n\nYour mouse settings stay on your Mac.\nIndependent software; not affiliated with MOJO."
-      ),
-    ])
+    if informationWindow == nil { informationWindow = AppInformationWindow() }
+    informationWindow?.showWindow(nil)
+    informationWindow?.window?.makeKeyAndOrderFront(nil)
+    NSApp.activate(ignoringOtherApps: true)
   }
+  @objc private func openGuide() { NSWorkspace.shared.open(AppInfo.guide) }
+  @objc private func openSupport() { NSWorkspace.shared.open(AppInfo.support) }
+  @objc private func openPrivacy() { NSWorkspace.shared.open(AppInfo.privacy) }
+
 }
 if CommandLine.arguments.contains("--version") {
-  print("Mojo Mouse 0.1.0")
+  print("\(AppInfo.name) \(AppInfo.version)")
   exit(0)
 }
 if CommandLine.arguments.contains("--diagnose") {
   let discovery = MouseConnection.discovery()
   var report: [String: Any] = [
-    "app": "Mojo Mouse", "version": "0.1.0", "supportedModel": "MJ-189", "usbID": "260d:1027",
+    "app": AppInfo.name, "version": AppInfo.version, "supportedModel": "MJ-189",
+    "usbID": "260d:1027",
     "connectedCount": discovery.count,
     "macOS": ProcessInfo.processInfo.operatingSystemVersionString,
   ]

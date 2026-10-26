@@ -16,15 +16,23 @@ final class SettingsWindow: NSWindowController, WKScriptMessageHandler, WKNaviga
       contentRect: NSRect(x: 0, y: 0, width: 1050, height: 760),
       styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false
     )
-    window.title = "Mojo Mouse · Profiles & rules"
+    window.title = "\(AppInfo.name) · Profiles & rules"
     window.minSize = NSSize(width: 850, height: 620)
+    if AppInfo.appStore {
+      window.setFrame(NSRect(x: 100, y: 100, width: 1280, height: 800), display: false)
+    }
     window.center()
     self.init(window: window)
     let config = WKWebViewConfiguration()
     config.userContentController.add(self, name: "mojo")
     let preferences = (try? store.read().preferences) ?? [:]
     let data = try! JSONSerialization.data(withJSONObject: preferences)
-    let script = "window.mojoPreferences = \(String(data:data,encoding:.utf8)!);"
+    let configuration: [String: Any] = [
+      "name": AppInfo.name, "experimental": AppInfo.allowsExperimental,
+    ]
+    let configData = try! JSONSerialization.data(withJSONObject: configuration)
+    let script =
+      "window.mojoPreferences = \(String(data:data,encoding:.utf8)!); window.mojoApp = \(String(data:configData,encoding:.utf8)!);"
     config.userContentController.addUserScript(
       WKUserScript(source: script, injectionTime: .atDocumentStart, forMainFrameOnly: true))
     web = WKWebView(frame: .zero, configuration: config)
@@ -119,6 +127,9 @@ final class SettingsWindow: NSWindowController, WKScriptMessageHandler, WKNaviga
         guard let key = payload["key"] as? String, let value = payload["value"] as? String else {
           throw MouseFailure(message: "Invalid preference.")
         }
+        guard key != "experimental" || value != "true" || AppInfo.allowsExperimental else {
+          throw MouseFailure(message: "Experimental controls are unavailable in this build.")
+        }
         try store.setPreference(key, value)
         result(id, data: true)
         return
@@ -198,7 +209,7 @@ final class SettingsWindow: NSWindowController, WKScriptMessageHandler, WKNaviga
           throw MouseFailure(message: "The export is too large.")
         }
         let panel = NSSavePanel()
-        panel.nameFieldStringValue = "Mojo Mouse profile.json"
+        panel.nameFieldStringValue = "\(AppInfo.name) profile.json"
         panel.beginSheetModal(for: window!) { response in
           do {
             if response == .OK, let url = panel.url {
@@ -239,7 +250,8 @@ final class SettingsWindow: NSWindowController, WKScriptMessageHandler, WKNaviga
       return
     }
     if ["macro", "rapidFire"].contains(action) || ((payload["liftOff"] as? Int) ?? 0) != 0 {
-      guard (try? store.read().preferences["experimental"]) == "true" else {
+      guard AppInfo.allowsExperimental && (try? store.read().preferences["experimental"]) == "true"
+      else {
         result(id, error: "Enable experimental controls in Advanced first.")
         return
       }
@@ -281,7 +293,8 @@ final class SettingsWindow: NSWindowController, WKScriptMessageHandler, WKNaviga
           output = try self.object(
             controller.apply(
               profile, to: mouse, textPixels: textPixels,
-              experimental: (try self.store.read().preferences["experimental"]) == "true"))
+              experimental: AppInfo.allowsExperimental
+                && (try self.store.read().preferences["experimental"]) == "true"))
         case "apply":
           let current = try controller.snapshot(mouse)
           guard current.data == (try self.bytes(payload["baseData"], count: 128)),
@@ -302,7 +315,8 @@ final class SettingsWindow: NSWindowController, WKScriptMessageHandler, WKNaviga
             display: SideDisplay())
           let applied = try controller.apply(
             draft, to: mouse,
-            experimental: (try self.store.read().preferences["experimental"]) == "true")
+            experimental: AppInfo.allowsExperimental
+              && (try self.store.read().preferences["experimental"]) == "true")
           if let height = payload["liftOff"] as? Int, height != 0 { try mouse.setLiftOff(height) }
           output = try self.object(applied)
         case "text": try mouse.sendTextPixels(self.bytes(payload["pixels"], count: 512))

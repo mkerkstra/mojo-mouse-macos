@@ -1,6 +1,6 @@
 # Releasing
 
-1. Update the app version in `Info.plist`, the About/CLI version strings, `package.json`, and the release notes.
+1. Update the app version in `Info.plist`, `package.json`, and the release notes. About and CLI read the bundled version directly.
 2. Run `npm ci --ignore-scripts`, `npm run check`, `shellcheck scripts/*.sh`, `npm audit --audit-level=low`, and `./scripts/build.sh`.
 3. Confirm the app opens, the offline profile/rule UI works, and read-only diagnostics identify a supported connected mouse or cleanly report none. Test actual changed behavior where hardware is available. Do not claim that CI verifies hardware.
 4. Review the staged source and documentation for private profiles, side text, app lists, usernames, signing keys, and proprietary vendor assets. None belongs in the public repository or download.
@@ -14,6 +14,8 @@
 The default is an ad-hoc signature. The initial release is not Developer ID signed or notarized, and the download instructions say so. Never describe ad-hoc signing as Apple verification.
 
 To improve the first-launch experience later, obtain the owner’s Developer ID Application identity, use hardened-runtime entitlements appropriate to the local WebKit app, submit the final distribution through Apple notarization, and staple/validate the result before replacing the download claim. Keep certificates and API keys outside the repository. The current workflow does not pretend to perform these steps.
+
+The separate App Store target is documented in [app-store.md](app-store.md).
 
 Do not remove quarantine attributes or disable Gatekeeper in the app or installer.
 

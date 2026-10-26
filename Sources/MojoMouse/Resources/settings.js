@@ -1,4 +1,5 @@
 'use strict';
+const experimentalAvailable = window.mojoApp?.experimental !== false;
 let libraryData = null,
   rulesDraft = null,
   ruleSettings = null,
@@ -115,7 +116,11 @@ const pages = [
 ];
 function renderNav() {
   $('#nav').innerHTML = pages
-    .filter(([id]) => prefs.getItem('experimental') === 'true' || !['macros', 'rapid'].includes(id))
+    .filter(
+      ([id]) =>
+        (experimentalAvailable && prefs.getItem('experimental') === 'true') ||
+        !['macros', 'rapid'].includes(id),
+    )
     .map(([id, name]) => `<button data-page="${id}">${name}</button>`)
     .join('');
 }
@@ -254,7 +259,8 @@ function renderPointer() {
   bind('sensX', (e) => (draft.data[35] = number(e, 1, 255)));
   bind('sensY', (e) => (draft.data[36] = number(e, 1, 255)));
   bind('lift', (e) => (draft.liftOff = +e.value));
-  $('#lift').disabled = prefs.getItem('experimental') !== 'true';
+  if (!experimentalAvailable) $('#lift').closest('.row').hidden = true;
+  $('#lift').disabled = !experimentalAvailable || prefs.getItem('experimental') !== 'true';
   for (let i = 0; i < 8; i++) {
     bind('dpi' + i, (e) => encodeDPI(i, number(e, 100, 12000)));
     bind('enabled' + i, (e) => {
@@ -322,7 +328,10 @@ function renderButtons() {
         : draft.buttons[i * 4] === 11
           ? 'rapid'
           : 'custom';
-    if (prefs.getItem('experimental') !== 'true' && ['macro', 'rapid'].includes(selected))
+    if (
+      (!experimentalAvailable || prefs.getItem('experimental') !== 'true') &&
+      ['macro', 'rapid'].includes(selected)
+    )
       selected = 'custom';
     $('#button' + i).value = selected;
     bind('button' + i, (e) => editButton(i, e.value));
@@ -339,11 +348,11 @@ function buttonRow(i, name) {
       : bytes[0] === 11
         ? 'Existing rapid-fire action'
         : 'Existing custom action (kept)';
-  return `<div class="row"><label>${esc(name)}<span class="help">${esc(prefs.getItem('experimental') === 'true' ? description + ' · ' + code : description)}</span></label>${select(
+  return `<div class="row"><label>${esc(name)}<span class="help">${esc(experimentalAvailable && prefs.getItem('experimental') === 'true' ? description + ' · ' + code : description)}</span></label>${select(
     'button' + i,
     actions.filter(
       (x) =>
-        prefs.getItem('experimental') === 'true' ||
+        (experimentalAvailable && prefs.getItem('experimental') === 'true') ||
         !['macro', 'rapid', '0f002e00', '0f000500'].includes(x[0]),
     ),
     '',
@@ -397,7 +406,7 @@ function editButton(i, value) {
     setButton(i, [11, 240, d, n]);
   }
   if (value === 'custom') {
-    if (prefs.getItem('experimental') !== 'true') {
+    if (!experimentalAvailable || prefs.getItem('experimental') !== 'true') {
       renderButtons();
       return;
     }
@@ -709,9 +718,13 @@ function renderRapid() {
 }
 
 function renderAdvanced() {
-  const experimental = prefs.getItem('experimental') === 'true';
+  const experimental = experimentalAvailable && prefs.getItem('experimental') === 'true';
   $('#content').innerHTML =
     `<div class="card"><h2>Experimental controls</h2><div class="row"><label>Show unverified features<span class="help">Macros, rapid fire, lift-off height, and raw byte editing</span></label>${check('experimental', experimental)}</div><p class="small">These commands are based on the vendor protocol. Playback and some settings cannot be read back or reliably verified. Automatic rules never upload macro or rapid-fire recipes.</p></div>${draft ? `<div class="card"><h2>Complete profile data</h2><p>All 128 bytes are visible for diagnosis. Named controls preserve the remaining vendor-specific fields.</p><textarea id="rawProfile" rows="8" spellcheck="false" ${experimental ? '' : 'readonly'} style="font-family:ui-monospace,monospace">${draft.data.map((b, i) => (i % 16 === 0 && i ? '\n' : '') + b.toString(16).padStart(2, '0')).join(' ')}</textarea>${experimental ? '<div class="row"><span class="small">128 bytes · independent of buttons and macros</span><button id="stageRaw">Stage byte edits</button></div>' : ''}<details><summary>Known field layout</summary><p class="small">35–36: X/Y scaling. 37–52 and 53–68: DPI banks. 71: enabled DPI stages. 73–78: body effect, options, RGB. 100–123: wheel colors.</p></details></div>` : ''}<div class="card"><h2>Compatibility & privacy</h2><p class="small">Supported: MOJO MJ-189, USB 260d:1027. This does not imply support for other MOJO models. Profile bytes, button maps, and polling rate are verified by readback. The side display is visually checked; existing content cannot be retrieved.</p><p class="small">Profiles, rules, and recipes stay in this Mac’s Application Support folder. No analytics, account, or network connection. Rules use app identifiers, without reading keystrokes or window contents.</p><button id="recentEvents">Show recent status events</button><pre id="events" class="small"></pre></div>`;
+  if (!experimentalAvailable) {
+    $('#experimental').disabled = true;
+    $('#experimental').closest('.card').hidden = true;
+  }
   bind('experimental', (e) => {
     prefs.setItem('experimental', e.checked ? 'true' : 'false');
     renderNav();
