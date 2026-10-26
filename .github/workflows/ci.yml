@@ -1,0 +1,29 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run format:check
+      - run: ./scripts/test.sh
+      - run: ./scripts/build.sh
+      - run: '"build/Mojo Mouse.app/Contents/MacOS/MojoMouse" --version'
+      - run: '"build/Mojo Mouse.app/Contents/MacOS/MojoMouse" --diagnose'

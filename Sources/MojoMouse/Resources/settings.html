@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:; connect-src 'none'"
+    />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="settings.css" />
+    <title>Mojo Mouse settings</title>
+  </head>
+  <body>
+    <aside>
+      <div class="brand">◒ <b>mojo</b><span>YOUR MOUSE, YOUR WAY</span></div>
+      <nav id="nav"></nav>
+      <div class="asideFoot">
+        <i id="dot"></i><span id="connection">Connecting…</span><small>MJ-189 · Local USB control</small>
+      </div>
+    </aside>
+    <main>
+      <header>
+        <div>
+          <div class="eyebrow">MOJO MJ-189</div>
+          <h1 id="title">Pointer & DPI</h1>
+        </div>
+        <button id="reload">Reload mouse</button>
+      </header>
+      <div id="notice" role="status" aria-live="polite">Reading your current settings…</div>
+      <div id="content"></div>
+      <footer>
+        <span id="dirty">No unapplied changes</span
+        ><button id="apply" class="primary">Apply profile changes</button>
+      </footer>
+    </main>
+    <script src="settings.js"></script>
+    <script src="profiles.js"></script>
+    <script src="rules.js"></script>
+    <script src="bootstrap.js"></script>
+  </body>
+</html>

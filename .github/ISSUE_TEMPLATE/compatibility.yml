@@ -1,0 +1,30 @@
+name: Compatibility report
+description: Share precise hardware and firmware validation
+title: '[Compatibility] '
+labels: [compatibility]
+body:
+  - type: input
+    id: model
+    attributes:
+      label: Exact model printed on the mouse
+    validations:
+      required: true
+  - type: input
+    id: usb
+    attributes:
+      label: USB vendor/product ID and HID/firmware version
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: macOS version, architecture, and Mojo Mouse version
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Feature-by-feature observations
+      description: Distinguish byte readback, visible/physical behavior, failures, and features not tested. Do not force writes to an unsupported model.
+    validations:
+      required: true

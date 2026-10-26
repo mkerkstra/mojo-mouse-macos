@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a reproducible problem with Mojo Mouse
+title: '[Bug] '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: 'Do not include private side text, app lists, serial numbers, signing keys, or profile backups.'
+  - type: input
+    id: version
+    attributes:
+      label: App version and macOS version
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Mouse model, USB ID, and firmware if known
+      placeholder: MJ-189, 260d:1027, HID 0316
+    validations:
+      required: true
+  - type: dropdown
+    id: arch
+    attributes:
+      label: Mac architecture
+      options: [Apple Silicon, Intel]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps, expected behavior, and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Optional read-only diagnostics
+      description: Review and redact before sharing. Do not paste private backups.
+      render: json

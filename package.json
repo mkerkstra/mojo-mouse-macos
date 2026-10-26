@@ -1,0 +1,14 @@
+{
+  "name": "mojo-mouse-macos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frontend checks and formatting for the native Mojo Mouse macOS app",
+  "scripts": {
+    "test": "node Tests/encoding.test.js",
+    "format:check": "prettier --check 'Sources/MojoMouse/Resources/*.{js,css,html}' '*.md' 'docs/*.md' '.github/**/*.{yml,md}'",
+    "format": "prettier --write 'Sources/MojoMouse/Resources/*.{js,css,html}' '*.md' 'docs/*.md' '.github/**/*.{yml,md}'"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

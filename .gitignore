@@ -1,0 +1,13 @@
+.DS_Store
+build/
+dist/
+node_modules/
+.env
+.env.*
+*.p12
+*.p8
+*.mobileprovision
+*.dmg
+*.zip
+Original mouse settings.json
+work/
