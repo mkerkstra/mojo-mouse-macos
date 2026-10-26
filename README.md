@@ -10,7 +10,7 @@
 
 Independent, open-source software. No Windows VM, account, cloud service, or telemetry. **Currently supports only the wired MOJO MJ-189 with USB ID `260d:1027`.** Support for other MOJO models is not implied.
 
-![Mojo Mouse profile editor showing named full and lighting-only profiles](docs/screenshots/profiles.png)
+![Mojo Mouse profile editor showing named full and lighting-only profiles](docs/screenshots/profiles.jpg)
 
 ## Download and install
 
@@ -47,7 +47,7 @@ Automatic switching is **off on a fresh install**. It requires a fallback and at
 - Manual edits and profile applications pause switching for one hour. Resume from the menu bar or rules page. Switching waits while you edit in Mojo Mouse.
 - Automatic rules upload readable profile settings and optional static display text. They **never upload macro or rapid-fire recipes**.
 
-![Mojo Mouse app and time rules with a quiet-evening schedule](docs/screenshots/rules.png)
+![Mojo Mouse app and time rules with a quiet-evening schedule](docs/screenshots/rules.jpg)
 
 See [profiles and rules](docs/profiles-and-rules.md) for examples and recovery behavior.
 
