@@ -1,7 +1,7 @@
 # Releasing
 
 1. Update the app version in `Info.plist`, the About/CLI version strings, `package.json`, and the release notes.
-2. Run `npm ci --ignore-scripts`, `npm run format:check`, `./scripts/test.sh`, and `./scripts/build.sh`.
+2. Run `npm ci --ignore-scripts`, `npm run check`, `shellcheck scripts/*.sh`, `npm audit --audit-level=low`, and `./scripts/build.sh`.
 3. Confirm the app opens, the offline profile/rule UI works, and read-only diagnostics identify a supported connected mouse or cleanly report none. Test actual changed behavior where hardware is available. Do not claim that CI verifies hardware.
 4. Review the staged source and documentation for private profiles, side text, app lists, usernames, signing keys, and proprietary vendor assets. None belongs in the public repository or download.
 5. Push the reviewed commit to main and wait for CI on Apple Silicon and Intel.
@@ -16,3 +16,5 @@ The default is an ad-hoc signature. The initial release is not Developer ID sign
 To improve the first-launch experience later, obtain the owner’s Developer ID Application identity, use hardened-runtime entitlements appropriate to the local WebKit app, submit the final distribution through Apple notarization, and staple/validate the result before replacing the download claim. Keep certificates and API keys outside the repository. The current workflow does not pretend to perform these steps.
 
 Do not remove quarantine attributes or disable Gatekeeper in the app or installer.
+
+Published versions are immutable in the release workflow: a rerun may complete an existing draft, but refuses to replace assets in a published release. Corrections need a new version and tag. CI and releases use the same validation workflow; do not bypass its dependency audit or lint checks for a release.

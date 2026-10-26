@@ -324,7 +324,7 @@ expectFailure("unrendered text rejected before writes") {
 check(textMouse.writes == 0, "text validation precedes device changes")
 _ = try controller.apply(text, to: textMouse, textPixels: Array(repeating: 1, count: 512))
 check(textMouse.pixels == Array(repeating: 1, count: 512), "prepared text passed through")
-// Native experimental policy is enforced on imported/saved/automatic writes.
+// Native experimental policy is enforced whenever a profile is applied.
 var rawCandidate = snapshot()
 rawCandidate.data[0] = 1
 expectFailure("stable mode rejects vendor-byte edits") {

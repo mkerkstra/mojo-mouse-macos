@@ -103,7 +103,9 @@ final class LibraryStore {
       // This is a fixed-size status history, separate from profile backups.
       if events.count > 100 { events = Array(events.suffix(100)) }
       try JSONEncoder().encode(events).write(to: path, options: .atomic)
-    } catch { /* Logging must not turn a successful hardware operation into a failure. */  }
+    } catch {
+      // Logging must not turn a successful hardware operation into a failure.
+    }
   }
   func events() -> [String] {
     lock.lock()

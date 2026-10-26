@@ -88,7 +88,7 @@ A corrupt library is reported without silently overwriting it. See [troubleshoot
 
 ## Build and test
 
-Requires Xcode Command Line Tools and Node.js for the optional frontend tests. No package dependencies are needed by the app.
+Requires Xcode Command Line Tools to build. Contribution checks use Xcode 16 or newer, Node.js 24, npm 11, and ShellCheck. No third-party runtime packages are needed by the app.
 
 ```bash
 xcode-select --install
@@ -105,6 +105,8 @@ The build cross-compiles for `arm64` and `x86_64`, combines both slices, and ad-
 ```
 
 `--diagnose` is read-only and omits serial numbers, app lists, usernames, profile contents, and local file paths. Tests use simulated hardware for rule decisions, persistence, scope boundaries, validation, rollback, and disconnect handling. They do not flash or configure a connected mouse.
+
+The shared CI/release checks enforce style, syntax, ShellCheck, warning-free builds, tests, and npm vulnerability auditing. Dependabot maintains the exact development-tool and GitHub Action pins. See [dependency hygiene](CONTRIBUTING.md#code-and-dependency-hygiene).
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md), the [protocol notes](docs/protocol.md), and the [release process](docs/releasing.md) before extending device support.
 

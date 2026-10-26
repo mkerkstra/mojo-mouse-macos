@@ -263,7 +263,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     setEnabled(false)
   }
   private func setEnabled(_ enabled: Bool) {
-    controls.forEach { $0.isEnabled = enabled }
+    for control in controls { control.isEnabled = enabled }
     // Reconnecting must remain available after a missing-device error.
     controls.first(where: { $0.action == #selector(openSettings) })?.isEnabled = true
     if !busy { controls.first(where: { $0.action == #selector(refresh) })?.isEnabled = true }

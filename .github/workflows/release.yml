@@ -4,32 +4,22 @@ on:
     tags: ['v*']
 permissions:
   contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-14, macos-15-intel]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: '24'
-          cache: npm
-      - run: npm ci --ignore-scripts --no-audit --no-fund
-      - run: npm run format:check
-      - run: ./scripts/test.sh
-      - run: ./scripts/build.sh
-      - run: '"build/Mojo Mouse.app/Contents/MacOS/MojoMouse" --version'
-      - run: '"build/Mojo Mouse.app/Contents/MacOS/MojoMouse" --diagnose'
+  validate:
+    uses: ./.github/workflows/validate.yml
   publish:
-    needs: test
-    runs-on: macos-14
+    needs: validate
+    runs-on: macos-15
+    timeout-minutes: 20
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - run: |
           version=$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' Sources/MojoMouse/Info.plist)
           test "$GITHUB_REF_NAME" = "v$version"
@@ -38,7 +28,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if ! gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            draft=$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)
+            if [ "$draft" != true ]; then
+              echo "A published release already exists. Publish fixes under a new version."
+              exit 1
+            fi
+          else
             gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag --draft --title "Mojo Mouse $GITHUB_REF_NAME" --notes-file docs/release-notes.md
           fi
           gh release upload "$GITHUB_REF_NAME" dist/Mojo-Mouse-macOS-universal.dmg dist/Mojo-Mouse-macOS-universal.zip dist/SHA256SUMS.txt --clobber --repo "$GITHUB_REPOSITORY"

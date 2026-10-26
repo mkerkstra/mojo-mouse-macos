@@ -5,10 +5,16 @@
   "description": "Frontend checks and formatting for the native Mojo Mouse macOS app",
   "scripts": {
     "test": "node Tests/encoding.test.js",
-    "format:check": "prettier --check 'Sources/MojoMouse/Resources/*.{js,css,html}' '*.md' 'docs/*.md' '.github/**/*.{yml,md}'",
-    "format": "prettier --write 'Sources/MojoMouse/Resources/*.{js,css,html}' '*.md' 'docs/*.md' '.github/**/*.{yml,md}'"
+    "format:check": "prettier --check 'Sources/MojoMouse/Resources/*.{js,css,html}' 'Tests/*.js' '*.{md,json}' 'docs/*.md' '.github/**/*.{yml,md}' .swift-format",
+    "format": "prettier --write 'Sources/MojoMouse/Resources/*.{js,css,html}' 'Tests/*.js' '*.{md,json}' 'docs/*.md' '.github/**/*.{yml,md}' .swift-format",
+    "lint": "./scripts/lint.sh",
+    "check": "npm run lint && ./scripts/test.sh"
   },
   "devDependencies": {
     "prettier": "3.9.10"
+  },
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11 <12"
   }
 }
